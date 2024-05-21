@@ -1,0 +1,14 @@
+server:
+  port: 8080
+
+
+  spring:
+    datasource:
+      url:jdbs:postgresql: //localhost/calculator.bank.test
+      username: postgres
+      password: Andrey224
+      driver-class-name: org.postgresql.Driver // драйвер БД
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
