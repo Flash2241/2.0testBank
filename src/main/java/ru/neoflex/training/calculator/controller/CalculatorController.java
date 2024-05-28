@@ -28,7 +28,7 @@ public class CalculatorController {
     public List<LoanOfferDto> calculatePrescoring(
             @Valid @RequestBody LoanStatementRequestDto loanRequest) {
         log.info("New prescoring request {}", loanRequest);
-        return List.of();
+        return scoringService.calculatePrescoring(loanRequest);
     }
 
     @PostMapping("/calc")
