@@ -1,5 +1,7 @@
 package ru.neoflex.training.calculator.exception;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -24,6 +26,26 @@ public class ExceptionsController {
         FieldError fieldError = fieldErrors.get(0);
         return new ResponseEntity<>(
                 new Error(fieldError.getDefaultMessage(),
+                        OffsetDateTime.now(),
+                        400,
+                        "Bad request"),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({InvalidFormatException.class})
+    public ResponseEntity<Error> handleValidationError(InvalidFormatException ex) {
+        String fieldName = ex.getPath().get(0).getFieldName();
+        if (ex.getTargetType() == LocalDate.class) {
+            return new ResponseEntity<>(
+                    new Error("'" + fieldName + "' illegal value: " + ex.getValue(),
+                            OffsetDateTime.now(),
+                            400,
+                            "Bad request"),
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        return new ResponseEntity<>(
+                new Error("'" + fieldName + "' illegal value",
                         OffsetDateTime.now(),
                         400,
                         "Bad request"),

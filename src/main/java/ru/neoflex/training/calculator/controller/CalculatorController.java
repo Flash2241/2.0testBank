@@ -32,7 +32,7 @@ public class CalculatorController {
     }
 
     @PostMapping("/calc")
-    public void calculateScoring(@RequestBody ScoringDataDto scoringData) {
+    public void calculateScoring(@Valid @RequestBody ScoringDataDto scoringData) {
         log.info("New scoring request {}", scoringData);
 
     }
