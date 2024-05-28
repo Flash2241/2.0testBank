@@ -6,11 +6,3 @@ server:
 spring:
   application:
     name: Calculator
-  datasource:
-    url: jdbc:postgresql://localhost:5432/calculator.bank.test
-    username: postgres
-    password: Andrey224
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
