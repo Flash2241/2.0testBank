@@ -1,17 +1,24 @@
 package ru.neoflex.training.calculator.model.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import ru.neoflex.training.calculator.model.Gender;
 import ru.neoflex.training.calculator.model.MaritalStatus;
 
 @Getter
 @Setter
+@ToString
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ScoringDataDto {
     private BigDecimal amount;
     private Integer term;
@@ -19,9 +26,11 @@ public class ScoringDataDto {
     private String lastName;
     private String middleName;
     private Gender gender;
-    private LocalDate birthDay;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy")
+    private LocalDate birthdate;
     private String passportSeries;
     private String passportNumber;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy")
     private LocalDate passportIssueDate;
     private String passportIssueBranch;
     private MaritalStatus maritalStatus;
