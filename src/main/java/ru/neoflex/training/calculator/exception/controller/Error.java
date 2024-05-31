@@ -1,4 +1,4 @@
-package ru.neoflex.training.calculator.exception;
+package ru.neoflex.training.calculator.exception.controller;
 
 import java.time.OffsetDateTime;
 import lombok.AllArgsConstructor;

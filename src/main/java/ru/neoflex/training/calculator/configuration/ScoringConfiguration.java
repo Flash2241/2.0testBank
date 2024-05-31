@@ -18,7 +18,7 @@ public class ScoringConfiguration {
     public void setSales(Map<String, Object> s) {
         for (Map.Entry<String, Object> sale : s.entrySet()) {
             sales.put(sale.getKey(),
-                    new OfferSale(((Number) ((Map<String, Object>) sale.getValue()).get("rate-decrease")).intValue(),
+                    new OfferSale(new BigDecimal(((Number) ((Map<String, Object>) sale.getValue()).get("rate-decrease")).doubleValue()),
                             new BigDecimal(((Number) ((Map<String, Object>) sale.getValue()).get("amount-multiply")).doubleValue()),
                             new BigDecimal(((Number) ((Map<String, Object>) sale.getValue()).get("temp-multiply")).doubleValue())));
         }

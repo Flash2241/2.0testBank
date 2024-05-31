@@ -2,5 +2,6 @@ package ru.neoflex.training.calculator.model;
 
 public enum Gender {
     MALE,
-    FEMALE
+    FEMALE,
+    NON_BINARY
 }
