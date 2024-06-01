@@ -5,8 +5,6 @@ import java.math.BigDecimal;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,9 +16,7 @@ import ru.neoflex.training.calculator.model.EmploymentStatus;
 @Getter
 @Setter
 @ToString
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
 public class EmploymentDto {
     @Schema(description = "занятость кредитора", example = "SELF_EMPLOYED")
     @NotNull(message = "'employmentStatus' field is required")

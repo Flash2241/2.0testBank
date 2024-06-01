@@ -10,4 +10,9 @@ class CalculatorApplicationTests {
 	void contextLoads() {
 	}
 
+	@Test
+	public void main() {
+		CalculatorApplication.main(new String[] {});
+	}
+
 }

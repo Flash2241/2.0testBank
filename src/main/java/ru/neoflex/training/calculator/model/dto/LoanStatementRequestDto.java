@@ -20,9 +20,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
 public class LoanStatementRequestDto {
     @Schema(description = "сумма кредита", example = "200000")
     @NotNull(message = "'amount' field is required")

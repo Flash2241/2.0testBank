@@ -21,39 +21,29 @@ import ru.neoflex.training.calculator.exception.CreditDeniedException;
 public class ExceptionsController {
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
-    public ResponseEntity<Error> handleValidationError(MethodArgumentNotValidException ex) {
+    public ResponseEntity<Map<String, Object>> handleValidationError(MethodArgumentNotValidException ex) {
         List<FieldError> fieldErrors = new ArrayList<>(ex.getFieldErrors());
         fieldErrors.sort(Comparator.comparing(FieldError::getField));
         FieldError fieldError = fieldErrors.get(0);
         log.info("Bad request, message: " + fieldError.getDefaultMessage());
         return new ResponseEntity<>(
-                new Error(fieldError.getDefaultMessage(),
-                        OffsetDateTime.now(),
-                        400,
-                        "Bad request"),
+                Map.of("message", fieldError.getDefaultMessage(),
+                        "date", OffsetDateTime.now(),
+                        "status", 400,
+                        "error", "Bad request"),
                 HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler({InvalidFormatException.class})
-    public ResponseEntity<Error> handleValidationError(InvalidFormatException ex) {
+    public ResponseEntity<Map<String, Object>> handleValidationError(InvalidFormatException ex) {
         String fieldName = ex.getPath().get(0).getFieldName();
-        if (ex.getTargetType() == LocalDate.class) {
-            String message = "'" + fieldName + "' illegal value: " + ex.getValue();
-            log.info("Bad request, message: " + message);
-            return new ResponseEntity<>(
-                    new Error(message,
-                            OffsetDateTime.now(),
-                            400,
-                            "Bad request"),
-                    HttpStatus.BAD_REQUEST);
-        }
         String message = "'" + fieldName + "' illegal value";
         log.info("Bad request, message: " + message);
         return new ResponseEntity<>(
-                new Error(message,
-                        OffsetDateTime.now(),
-                        400,
-                        "Bad request"),
+                Map.of("message", message,
+                        "date", OffsetDateTime.now(),
+                        "status", 400,
+                        "error", "Bad request"),
                 HttpStatus.BAD_REQUEST);
     }
 

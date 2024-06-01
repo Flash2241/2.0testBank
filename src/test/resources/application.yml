@@ -10,7 +10,7 @@ spring:
 scoring:
   offers:
     base-rate: 10
-    insurance-price: 150000   # ежегодно
+    insurance-price: 150000
     sales:
       insurance:
         rate-decrease: 2

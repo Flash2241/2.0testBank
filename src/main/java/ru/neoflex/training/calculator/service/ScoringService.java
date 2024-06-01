@@ -2,6 +2,7 @@ package ru.neoflex.training.calculator.service;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
@@ -27,7 +28,8 @@ import ru.neoflex.training.calculator.model.dto.ScoringDataDto;
 @Service
 public class ScoringService {
 
-    private MathContext mc = new MathContext(5);
+    private MathContext mcCount = new MathContext(50);
+    private int scalePrint = 5;
 
     @Value("${scoring.offers.base-rate}")
     private BigDecimal baseRate;
@@ -42,16 +44,18 @@ public class ScoringService {
             BigDecimal.valueOf(1));
 
     public List<LoanOfferDto> calculatePrescoring(LoanStatementRequestDto request) {
+        validatePrescoring(request);
         OfferSale salarySale = scoringConfiguration.getSales().computeIfAbsent("salary", (x) -> defaultOfferSale);
         OfferSale insuranceSale = scoringConfiguration.getSales().computeIfAbsent("insurance", (x) -> defaultOfferSale);
         OfferSale insuranceSalarySale = scoringConfiguration.getSales().computeIfAbsent("insurance-salary", (x) -> defaultOfferSale);
+        log.info("Create offers to client {} {}", request.getFirstName(), request.getLastName());
         return List.of(
                 LoanOfferDto.builder()
                         .statementId(UUID.randomUUID())
                         .requestedAmount(request.getAmount())
                         .totalAmount(request.getAmount())
                         .term(request.getTerm())
-                        .rate(baseRate.round(mc))
+                        .rate(baseRate.round(mcCount))
                         .isInsuranceEnabled(false)
                         .isSalaryClient(false)
                         .build(),
@@ -60,7 +64,7 @@ public class ScoringService {
                         .requestedAmount(request.getAmount().multiply(insuranceSale.getAmountMultiply()))
                         .totalAmount(request.getAmount())
                         .term(BigDecimal.valueOf(request.getTerm()).multiply(insuranceSale.getTempMultiply()).intValue())
-                        .rate(baseRate.subtract(insuranceSale.getRateDecrease()).round(mc))
+                        .rate(baseRate.subtract(insuranceSale.getRateDecrease()).round(mcCount))
                         .isInsuranceEnabled(true)
                         .isSalaryClient(false)
                         .build(),
@@ -69,7 +73,7 @@ public class ScoringService {
                         .requestedAmount(request.getAmount().multiply(salarySale.getAmountMultiply()))
                         .totalAmount(request.getAmount())
                         .term(BigDecimal.valueOf(request.getTerm()).multiply(salarySale.getTempMultiply()).intValue())
-                        .rate(baseRate.subtract(insuranceSale.getRateDecrease()).round(mc))
+                        .rate(baseRate.subtract(insuranceSale.getRateDecrease()).round(mcCount))
                         .isInsuranceEnabled(false)
                         .isSalaryClient(true)
                         .build(),
@@ -78,7 +82,7 @@ public class ScoringService {
                         .requestedAmount(request.getAmount().multiply(insuranceSalarySale.getAmountMultiply()))
                         .totalAmount(request.getAmount())
                         .term(BigDecimal.valueOf(request.getTerm()).multiply(insuranceSalarySale.getTempMultiply()).intValue())
-                        .rate(baseRate.subtract(insuranceSalarySale.getRateDecrease().round(mc)))
+                        .rate(baseRate.subtract(insuranceSalarySale.getRateDecrease().round(mcCount)))
                         .isInsuranceEnabled(true)
                         .isSalaryClient(true)
                         .build()
@@ -88,22 +92,22 @@ public class ScoringService {
     private void validatePrescoring(LoanStatementRequestDto requestDto) {
         log.info("Checking prescoring person data is he possible to get credit");
         Period age = Period.between(requestDto.getBirthdate(), LocalDate.now());
-        if (age.getYears() < 20 || age.getYears() > 65) {
+        if (age.getYears() < 18) {
             throw new CreditDeniedException("denied", "bad age");
         }
     }
 
     public CreditDto calculateCredit(ScoringDataDto scoringData) {
         validateScoring(scoringData);
-        BigDecimal rate = calculateRate(baseRate, scoringData).divide(BigDecimal.valueOf(100), mc);
+        BigDecimal rate = calculateRate(baseRate, scoringData).divide(BigDecimal.valueOf(100), mcCount);
         BigDecimal monthlyPayment = calculateMonthlyPayment(scoringData.getAmount(), rate, scoringData.getTerm());
 
         return CreditDto.builder()
-                .amount(scoringData.getAmount())
+                .amount(scoringData.getAmount().setScale(scalePrint, RoundingMode.HALF_UP))
                 .term(scoringData.getTerm())
-                .rate(rate.multiply(BigDecimal.valueOf(100)).round(mc))
-                .monthlyPayment(monthlyPayment)
-                .psk(calculatePsk(scoringData.getAmount(), monthlyPayment, scoringData.getTerm(), scoringData.getIsInsuranceEnabled()))
+                .rate(rate.multiply(BigDecimal.valueOf(100)).setScale(scalePrint, RoundingMode.HALF_UP))
+                .monthlyPayment(monthlyPayment.setScale(scalePrint, RoundingMode.HALF_UP))
+                .psk(calculatePsk(scoringData.getAmount(), monthlyPayment, scoringData.getTerm(), scoringData.getIsInsuranceEnabled()).setScale(scalePrint, RoundingMode.HALF_UP))
                 .isInsuranceEnabled(scoringData.getIsInsuranceEnabled())
                 .isSalaryClient(scoringData.getIsSalaryClient())
                 .paymentSchedule(calculatePaymentSchedule(scoringData.getAmount(), rate, scoringData.getTerm(), monthlyPayment))
@@ -113,10 +117,10 @@ public class ScoringService {
     private void validateScoring(ScoringDataDto scoringData) {
         log.info("Checking scoring person data is he possible to get credit");
         if (EmploymentStatus.UNEMPLOYED.equals(scoringData.getEmployment().getEmploymentStatus())) {
-            throw new CreditDeniedException("denied", "bad unemployed");
+            throw new CreditDeniedException("denied", "unemployed");
         }
         if (!scoringData.getEmployment().getSalary().equals(BigDecimal.valueOf(0))
-            && scoringData.getAmount().divide(scoringData.getEmployment().getSalary(), mc).compareTo(BigDecimal.valueOf(25)) >= 0) {
+            && scoringData.getAmount().divide(scoringData.getEmployment().getSalary(), mcCount).compareTo(BigDecimal.valueOf(25)) >= 0) {
             throw new CreditDeniedException("denied", "amount is 25 times greater than salary");
         }
         if (scoringData.getEmployment().getSalary().equals(BigDecimal.valueOf(0))) {
@@ -169,6 +173,9 @@ public class ScoringService {
             OfferSale salarySale = scoringConfiguration.getSales().computeIfAbsent("salary", (x) -> defaultOfferSale);
             baseRate = baseRate.subtract(salarySale.getRateDecrease());
         }
+        if (baseRate.compareTo(BigDecimal.valueOf(1)) < 0) {
+            baseRate = BigDecimal.valueOf(1);
+        }
         return baseRate;
     }
 
@@ -185,11 +192,11 @@ public class ScoringService {
      * @return ежемесячный платеж
      */
     private BigDecimal calculateMonthlyPayment(BigDecimal amount, BigDecimal rate, int paymentsNumber) {
-        BigDecimal monthlyRate = rate.divide(BigDecimal.valueOf(12), mc);
+        BigDecimal monthlyRate = rate.divide(BigDecimal.valueOf(12), mcCount);
         BigDecimal precalculatedTemp = monthlyRate.add(BigDecimal.valueOf(1)).pow(paymentsNumber);
         BigDecimal divisible = monthlyRate.multiply(precalculatedTemp);
         BigDecimal divider = precalculatedTemp.subtract(BigDecimal.valueOf(1));
-        return amount.multiply(divisible.divide(divider, mc));
+        return amount.multiply(divisible.divide(divider, mcCount));
     }
 
     /**
@@ -204,7 +211,7 @@ public class ScoringService {
         BigDecimal payment = monthlyPayment.multiply(BigDecimal.valueOf(term));
         //   считаем ежегодную страховку
         if (isInsuranceEnabled) {
-            payment = payment.add(insurancePrice.multiply(BigDecimal.valueOf(term).divide(BigDecimal.valueOf(12), mc)));
+            payment = payment.add(insurancePrice.multiply(BigDecimal.valueOf(term).divide(BigDecimal.valueOf(12), mcCount)));
         }
         return payment;
     }
@@ -213,25 +220,25 @@ public class ScoringService {
                                                                      BigDecimal rate,
                                                                      int term,
                                                                      BigDecimal monthlyPayment) {
-        BigDecimal monthlyRate = rate.divide(BigDecimal.valueOf(12), mc);
-        BigDecimal debtPayment = monthlyPayment.divide(monthlyRate.add(BigDecimal.valueOf(1)), mc);
+        BigDecimal monthlyRate = rate.divide(BigDecimal.valueOf(12), mcCount);
+        BigDecimal debtPayment = monthlyPayment.divide(monthlyRate.add(BigDecimal.valueOf(1)), mcCount);
         BigDecimal interestPayment = monthlyPayment.subtract(debtPayment);
         BigDecimal totalPayment = BigDecimal.valueOf(0);
         BigDecimal debtPaymentTotal = BigDecimal.valueOf(0);
         List<PaymentScheduleElementDto> payments = new ArrayList<>();
         for (int i = 0; i < term; ++i) {
-            interestPayment = amount.subtract(debtPaymentTotal).multiply(monthlyRate).round(mc);
+            interestPayment = amount.subtract(debtPaymentTotal).multiply(monthlyRate);
             debtPayment = monthlyPayment.subtract(interestPayment);
-            debtPaymentTotal = debtPaymentTotal.add(debtPayment).round(mc);
-            totalPayment = totalPayment.add(monthlyPayment).round(mc);
+            debtPaymentTotal = debtPaymentTotal.add(debtPayment);
+            totalPayment = totalPayment.add(monthlyPayment);
             payments.add(
                     PaymentScheduleElementDto.builder()
                             .number(i + 1)
                             .date(LocalDate.now().plusMonths(i + 1))
-                            .totalPayment(totalPayment)
-                            .interestPayment(interestPayment)
-                            .debtPayment(debtPayment)
-                            .remainingDebt(amount.subtract(debtPaymentTotal))
+                            .totalPayment(totalPayment.setScale(scalePrint, RoundingMode.HALF_UP))
+                            .interestPayment(interestPayment.setScale(scalePrint, RoundingMode.HALF_UP))
+                            .debtPayment(debtPayment.setScale(scalePrint, RoundingMode.HALF_UP))
+                            .remainingDebt(amount.subtract(debtPaymentTotal).setScale(scalePrint, RoundingMode.HALF_UP))
                             .build()
             );
         }
