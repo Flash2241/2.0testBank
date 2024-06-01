@@ -27,18 +27,20 @@ import ru.neoflex.training.calculator.model.dto.ScoringDataDto;
 @RequiredArgsConstructor
 @Service
 public class ScoringService {
-
+    //  точность расчетов
     private MathContext mcCount = new MathContext(50);
+    //  количество знаков для округления при отправке ответа
     private int scalePrint = 5;
 
     @Value("${scoring.offers.base-rate}")
     private BigDecimal baseRate;
 
     @Value("${scoring.offers.insurance-price}")
-    private BigDecimal insurancePrice;
+    private BigDecimal insurancePrice;   // ежегодно нужно оплачивать
 
     private final ScoringConfiguration scoringConfiguration;
 
+    //  офер по умолчанию, если нет особых условий из application.yml для insurance - true, salaryclient - true
     private final OfferSale defaultOfferSale = new OfferSale(BigDecimal.valueOf(0),
             BigDecimal.valueOf(1),
             BigDecimal.valueOf(1));
@@ -89,6 +91,12 @@ public class ScoringService {
         );
     }
 
+    /**
+     * Валидация клиента для прескоринга.
+     * Если клиент не подходит под требования, то выбрасывается исключение {@link CreditDeniedException}.
+     *
+     * @param requestDto данные клиента
+     */
     private void validatePrescoring(LoanStatementRequestDto requestDto) {
         log.info("Checking prescoring person data is he possible to get credit");
         Period age = Period.between(requestDto.getBirthdate(), LocalDate.now());
@@ -107,13 +115,19 @@ public class ScoringService {
                 .term(scoringData.getTerm())
                 .rate(rate.multiply(BigDecimal.valueOf(100)).setScale(scalePrint, RoundingMode.HALF_UP))
                 .monthlyPayment(monthlyPayment.setScale(scalePrint, RoundingMode.HALF_UP))
-                .psk(calculatePsk(scoringData.getAmount(), monthlyPayment, scoringData.getTerm(), scoringData.getIsInsuranceEnabled()).setScale(scalePrint, RoundingMode.HALF_UP))
+                .psk(calculatePsk(monthlyPayment, scoringData.getTerm(), scoringData.getIsInsuranceEnabled()).setScale(scalePrint, RoundingMode.HALF_UP))
                 .isInsuranceEnabled(scoringData.getIsInsuranceEnabled())
                 .isSalaryClient(scoringData.getIsSalaryClient())
                 .paymentSchedule(calculatePaymentSchedule(scoringData.getAmount(), rate, scoringData.getTerm(), monthlyPayment))
                 .build();
     }
 
+    /**
+     * Валидация клиента для получения кредита.
+     * Если клиент не подходит под требования, то выбрасывается исключение {@link CreditDeniedException}.
+     *
+     * @param scoringData данные клиента
+     */
     private void validateScoring(ScoringDataDto scoringData) {
         log.info("Checking scoring person data is he possible to get credit");
         if (EmploymentStatus.UNEMPLOYED.equals(scoringData.getEmployment().getEmploymentStatus())) {
@@ -138,7 +152,15 @@ public class ScoringService {
         }
     }
 
+    /**
+     * Подсчет ставки кредита на информации о клиенте.
+     *
+     * @param baseRate базовая ставка в процентах
+     * @param scoringData данные о клиенте
+     * @return ставка в процентах (например, 15)
+     */
     private BigDecimal calculateRate(BigDecimal baseRate, ScoringDataDto scoringData) {
+        log.info("Calculate client personal rate");
         switch (scoringData.getEmployment().getEmploymentStatus()) {
             case SELF_EMPLOYED -> baseRate = baseRate.add(BigDecimal.valueOf(1));
             case BUSINESS_OWNER -> baseRate = baseRate.add(BigDecimal.valueOf(2));
@@ -184,10 +206,10 @@ public class ScoringService {
      * a * b * (1 + b)^c / ((1 + b) ^ c - 1)
      * a - сумма кредита,
      * b - месячная процентная ставка (считается как годовая ставка / 12)
-     * c - количество платежей
+     * c - количество платежей.
      *
      * @param amount сумма под кредит
-     * @param rate годовая ставка
+     * @param rate годовая ставка дробью (например, 0.12)
      * @param paymentsNumber количество выплат
      * @return ежемесячный платеж
      */
@@ -200,13 +222,14 @@ public class ScoringService {
     }
 
     /**
+     * Расчет полной стоимости кредита по формуле:
+     * PSK = monthlyPayment * term + insuranceAnnuallyPrice * (term / 12)
      *
-     * @param amount
-     * @param monthlyPayment
-     * @param term
-     * @return
+     * @param monthlyPayment ежемесячная оплата кредита
+     * @param term количество месяцев
+     * @return полная стоимость кредита
      */
-    private BigDecimal calculatePsk(BigDecimal amount, BigDecimal monthlyPayment, int term, boolean isInsuranceEnabled) {
+    private BigDecimal calculatePsk(BigDecimal monthlyPayment, int term, boolean isInsuranceEnabled) {
         //   считаем все выплаты
         BigDecimal payment = monthlyPayment.multiply(BigDecimal.valueOf(term));
         //   считаем ежегодную страховку
@@ -216,6 +239,15 @@ public class ScoringService {
         return payment;
     }
 
+    /**
+     * Расчет графика платежей.
+     *
+     * @param amount сумма займа
+     * @param rate годовая ставка дробью (например, 0.12)
+     * @param term количество месяцев
+     * @param monthlyPayment ежемесячная оплата
+     * @return описание каждого необходимого платежа в {@link PaymentScheduleElementDto}
+     */
     private List<PaymentScheduleElementDto> calculatePaymentSchedule(BigDecimal amount,
                                                                      BigDecimal rate,
                                                                      int term,
