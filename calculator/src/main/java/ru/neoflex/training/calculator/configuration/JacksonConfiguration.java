@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.math.BigDecimal;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import ru.neoflex.training.calculator.common.BigDecimalSerializer;
 
 @Configuration
 public class JacksonConfiguration {

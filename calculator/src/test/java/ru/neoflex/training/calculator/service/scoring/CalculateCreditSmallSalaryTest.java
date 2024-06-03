@@ -13,8 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.neoflex.training.calculator.configuration.ScoringConfiguration;
 import ru.neoflex.training.calculator.exception.CreditDeniedException;
+import ru.neoflex.training.calculator.exception.ErrorMessages;
 import ru.neoflex.training.calculator.model.dto.ScoringDataDto;
-import ru.neoflex.training.calculator.service.ScoringService;
+import ru.neoflex.training.calculator.service.implementation.ScoringServiceImpl;
 
 @SpringBootTest
 public class CalculateCreditSmallSalaryTest {
@@ -23,7 +24,7 @@ public class CalculateCreditSmallSalaryTest {
     private ScoringConfiguration scoringConfiguration;
 
     @Autowired
-    private ScoringService scoringService;
+    private ScoringServiceImpl scoringService;
 
     @Autowired
     ObjectMapper mapper;
@@ -33,7 +34,7 @@ public class CalculateCreditSmallSalaryTest {
         ScoringDataDto scoringData = mapper.readValue(scoringDataInput, ScoringDataDto.class);
         scoringData.setBirthdate(LocalDate.now().minusYears(20));
         CreditDeniedException resultException = assertThrows(CreditDeniedException.class, () -> scoringService.calculateCredit(scoringData));
-        assertEquals("amount is 25 times greater than salary", resultException.getReason());
+        assertEquals(ErrorMessages.amountIsTooBig, resultException.getReason());
     }
 
     private static final String scoringDataInput = """

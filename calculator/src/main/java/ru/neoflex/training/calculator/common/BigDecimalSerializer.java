@@ -1,4 +1,4 @@
-package ru.neoflex.training.calculator.configuration;
+package ru.neoflex.training.calculator.common;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;

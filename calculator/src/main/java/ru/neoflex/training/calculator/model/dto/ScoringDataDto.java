@@ -35,18 +35,18 @@ public class ScoringDataDto {
     private Integer term;
     @Schema(description = "имя кредитора", example = "Дмитрий")
     @NotNull(message = "'firstName' field is required")
-    @Pattern(regexp = "^[a-zA-Z]+$",
+    @Pattern(regexp = "^[a-zA-Zа-яА-Я]+$",
             message = "'firstName' can contain only latin letters")
     @Size(min = 2, max = 30, message = "'firstName' length must be in range from 2 to 30")
     private String firstName;
     @Schema(description = "фамилия кредитора", example = "Воронин")
     @NotNull(message = "'lastName' field is required")
-    @Pattern(regexp = "^[a-zA-Z]+$",
+    @Pattern(regexp = "^[a-zA-Zа-яА-Я]+$",
             message = "'lastName' can contain only latin letters")
     @Size(min = 2, max = 30, message = "'lastName' length must be in range from 2 to 30")
     private String lastName;
     @Schema(description = "второе имя кредитора", example = "Сан")
-    @Pattern(regexp = "^[a-zA-Z]*$",
+    @Pattern(regexp = "^[a-zA-Zа-яА-Я]*$",
             message = "'middleName' can contain only latin letters")
     @Size(min = 2, max = 30, message = "'middleName' length must be in range from 2 to 30")
     private String middleName;

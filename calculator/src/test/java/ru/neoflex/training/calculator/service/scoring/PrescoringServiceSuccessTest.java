@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -16,7 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.neoflex.training.calculator.configuration.ScoringConfiguration;
 import ru.neoflex.training.calculator.model.dto.LoanOfferDto;
 import ru.neoflex.training.calculator.model.dto.LoanStatementRequestDto;
-import ru.neoflex.training.calculator.service.ScoringService;
+import ru.neoflex.training.calculator.service.implementation.ScoringServiceImpl;
 
 @SpringBootTest
 public class PrescoringServiceSuccessTest {
@@ -25,7 +24,7 @@ public class PrescoringServiceSuccessTest {
     private ScoringConfiguration scoringConfiguration;
 
     @Autowired
-    private ScoringService scoringService;
+    private ScoringServiceImpl scoringService;
 
     @Autowired
     ObjectMapper mapper;
@@ -61,42 +60,42 @@ public class PrescoringServiceSuccessTest {
 
     private static final String loanOffersOutput = """
             [
-              {
-                "isInsuranceEnabled": false,
-                "isSalaryClient": false,
-                "rate": "10",
-                "requestedAmount": "123.123",
-                "statementId": null,
-                "term": 123,
-                "totalAmount": "123.123"
-              },
-              {
-                "isInsuranceEnabled": true,
-                "isSalaryClient": false,
-                "rate": "8",
-                "requestedAmount": "147.7475999999999945322404215630740509368479251861572265625",
-                "statementId": null,
-                "term": 135,
-                "totalAmount": "123.123"
-              },
-              {
-                "isInsuranceEnabled": false,
-                "isSalaryClient": true,
-                "rate": "8",
-                "requestedAmount": "184.6845",
-                "statementId": null,
-                "term": 147,
-                "totalAmount": "123.123"
-              },
-              {
-                "isInsuranceEnabled": true,
-                "isSalaryClient": true,
-                "rate": "4",
-                "requestedAmount": "246.246",
-                "statementId": null,
-                "term": 246,
-                "totalAmount": "123.123"
-              }
-            ]
+               {
+                 "isInsuranceEnabled": false,
+                 "isSalaryClient": false,
+                 "rate": "10",
+                 "requestedAmount": "123.123",
+                 "statementId": null,
+                 "term": 123,
+                 "totalAmount": "123.123"
+               },
+               {
+                 "isInsuranceEnabled": true,
+                 "isSalaryClient": false,
+                 "rate": "8",
+                 "requestedAmount": "123.123",
+                 "statementId": null,
+                 "term": 135,
+                 "totalAmount": "147.7475999999999945322404215630740509368479251861572265625"
+               },
+               {
+                 "isInsuranceEnabled": false,
+                 "isSalaryClient": true,
+                 "rate": "6",
+                 "requestedAmount": "123.123",
+                 "statementId": null,
+                 "term": 147,
+                 "totalAmount": "184.6845"
+               },
+               {
+                 "isInsuranceEnabled": true,
+                 "isSalaryClient": true,
+                 "rate": "4",
+                 "requestedAmount": "123.123",
+                 "statementId": null,
+                 "term": 246,
+                 "totalAmount": "246.246"
+               }
+             ]
             """;
 }

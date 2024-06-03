@@ -15,6 +15,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import ru.neoflex.training.calculator.exception.CreditDeniedException;
+import ru.neoflex.training.calculator.exception.ErrorMessages;
 
 @Slf4j
 @ControllerAdvice
@@ -50,7 +51,7 @@ public class ExceptionsController {
     @ExceptionHandler({CreditDeniedException.class})
     public ResponseEntity<Object> denied(CreditDeniedException ex) {
         log.info("User scoring was denied, reason: " + ex.getReason());
-        return new ResponseEntity<>(Map.of("status", "denied", "reason", ex.getReason()),
+        return new ResponseEntity<>(Map.of("status", ErrorMessages.denied, "reason", ex.getReason()),
                 HttpStatus.OK);
     }
 }

@@ -5,19 +5,16 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.List;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.neoflex.training.calculator.configuration.ScoringConfiguration;
 import ru.neoflex.training.calculator.exception.CreditDeniedException;
-import ru.neoflex.training.calculator.model.dto.LoanOfferDto;
+import ru.neoflex.training.calculator.exception.ErrorMessages;
 import ru.neoflex.training.calculator.model.dto.LoanStatementRequestDto;
-import ru.neoflex.training.calculator.service.ScoringService;
+import ru.neoflex.training.calculator.service.implementation.ScoringServiceImpl;
 
 
 @SpringBootTest
@@ -27,7 +24,7 @@ public class PrescoringServiceUnderAgeTest {
     private ScoringConfiguration scoringConfiguration;
 
     @Autowired
-    private ScoringService scoringService;
+    private ScoringServiceImpl scoringService;
 
     @Autowired
     ObjectMapper mapper;
@@ -36,7 +33,7 @@ public class PrescoringServiceUnderAgeTest {
     void testUnderAge() throws JsonProcessingException {
         LoanStatementRequestDto loanStatement = mapper.readValue(loanStatementInput, LoanStatementRequestDto.class);
         CreditDeniedException resultException = assertThrows(CreditDeniedException.class, () -> scoringService.calculatePrescoring(loanStatement));
-        assertEquals("bad age", resultException.getReason());
+        assertEquals(ErrorMessages.badAge, resultException.getReason());
     }
 
     private static final String loanStatementInput = """

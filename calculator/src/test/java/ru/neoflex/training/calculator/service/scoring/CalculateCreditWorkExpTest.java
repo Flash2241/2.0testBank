@@ -12,8 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.neoflex.training.calculator.configuration.ScoringConfiguration;
 import ru.neoflex.training.calculator.exception.CreditDeniedException;
+import ru.neoflex.training.calculator.exception.ErrorMessages;
 import ru.neoflex.training.calculator.model.dto.ScoringDataDto;
-import ru.neoflex.training.calculator.service.ScoringService;
+import ru.neoflex.training.calculator.service.implementation.ScoringServiceImpl;
 
 @SpringBootTest
 public class CalculateCreditWorkExpTest {
@@ -22,7 +23,7 @@ public class CalculateCreditWorkExpTest {
     private ScoringConfiguration scoringConfiguration;
 
     @Autowired
-    private ScoringService scoringService;
+    private ScoringServiceImpl scoringService;
 
     @Autowired
     ObjectMapper mapper;
@@ -33,7 +34,7 @@ public class CalculateCreditWorkExpTest {
         scoringData.setBirthdate(LocalDate.now().minusYears(20));
         scoringData.getEmployment().setWorkExperienceTotal(0);
         CreditDeniedException resultException = assertThrows(CreditDeniedException.class, () -> scoringService.calculateCredit(scoringData));
-        assertEquals("not enough total work experience", resultException.getReason());
+        assertEquals(ErrorMessages.smallWorkExperience, resultException.getReason());
     }
 
     private static final String scoringDataInput = """

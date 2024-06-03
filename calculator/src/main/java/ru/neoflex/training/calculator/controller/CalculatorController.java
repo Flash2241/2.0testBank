@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.neoflex.training.calculator.common.HttpStatusConst;
 import ru.neoflex.training.calculator.model.dto.CreditDto;
 import ru.neoflex.training.calculator.model.dto.LoanOfferDto;
 import ru.neoflex.training.calculator.model.dto.LoanStatementRequestDto;
@@ -29,8 +30,8 @@ import ru.neoflex.training.calculator.service.ScoringService;
 
 
 @ApiResponses(value = {
-        @ApiResponse(responseCode = "400",
-                description = "Неверные входные данные. Причина написана в поле \"error\"",
+        @ApiResponse(responseCode = HttpStatusConst.badRequestCode,
+                description = HttpStatusConst.badRequestDescription,
                 content = @Content(mediaType = "application/json",
                         schema = @Schema(implementation = Error.class),
                         examples = {
@@ -56,7 +57,7 @@ public class CalculatorController {
     private final ScoringService scoringService;
 
     @Operation(summary = "Прескоринг клиента", responses = {
-            @ApiResponse(responseCode = "200", content = @Content(
+            @ApiResponse(responseCode = HttpStatusConst.okCode, content = @Content(
                     mediaType = "application/json",
                     array = @ArraySchema(schema = @Schema(implementation = CreditDto.class))
             )
@@ -67,15 +68,11 @@ public class CalculatorController {
             @Valid @RequestBody LoanStatementRequestDto loanRequest) {
         log.info("New prescoring request {}", loanRequest);
         List<LoanOfferDto> result = new ArrayList<>(scoringService.calculatePrescoring(loanRequest));
-        log.info("Prescoring sorting result by rate descending");
-        result.sort(Comparator.comparing(LoanOfferDto::getRate,
-                (x1, x2) -> x2.subtract(x1).compareTo(BigDecimal.valueOf(0))));
-        log.info("Prescoring result {}", result);
         return result;
     }
 
     @Operation(summary = "Расчет кредита", responses = {
-            @ApiResponse(responseCode = "200", content = @Content(
+            @ApiResponse(responseCode = HttpStatusConst.okCode, content = @Content(
                     mediaType = "application/json",
                     schema = @Schema(implementation = CreditDto.class)
             )

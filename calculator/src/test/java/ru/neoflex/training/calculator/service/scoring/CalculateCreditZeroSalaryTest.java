@@ -13,8 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.neoflex.training.calculator.configuration.ScoringConfiguration;
 import ru.neoflex.training.calculator.exception.CreditDeniedException;
+import ru.neoflex.training.calculator.exception.ErrorMessages;
 import ru.neoflex.training.calculator.model.dto.ScoringDataDto;
-import ru.neoflex.training.calculator.service.ScoringService;
+import ru.neoflex.training.calculator.service.implementation.ScoringServiceImpl;
 
 @SpringBootTest
 public class CalculateCreditZeroSalaryTest {
@@ -23,7 +24,7 @@ public class CalculateCreditZeroSalaryTest {
     private ScoringConfiguration scoringConfiguration;
 
     @Autowired
-    private ScoringService scoringService;
+    private ScoringServiceImpl scoringService;
 
     @Autowired
     ObjectMapper mapper;
@@ -33,7 +34,7 @@ public class CalculateCreditZeroSalaryTest {
         ScoringDataDto scoringData = mapper.readValue(scoringDataInput, ScoringDataDto.class);
         scoringData.setBirthdate(LocalDate.now().minusYears(20));
         CreditDeniedException resultException = assertThrows(CreditDeniedException.class, () -> scoringService.calculateCredit(scoringData));
-        assertEquals("salary is zero", resultException.getReason());
+        assertEquals(ErrorMessages.zeroSalary, resultException.getReason());
     }
 
     private static final String scoringDataInput = """

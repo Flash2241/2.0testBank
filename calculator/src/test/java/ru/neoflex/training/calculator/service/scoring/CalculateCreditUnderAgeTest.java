@@ -12,9 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.neoflex.training.calculator.configuration.ScoringConfiguration;
 import ru.neoflex.training.calculator.exception.CreditDeniedException;
-import ru.neoflex.training.calculator.model.dto.CreditDto;
+import ru.neoflex.training.calculator.exception.ErrorMessages;
 import ru.neoflex.training.calculator.model.dto.ScoringDataDto;
-import ru.neoflex.training.calculator.service.ScoringService;
+import ru.neoflex.training.calculator.service.implementation.ScoringServiceImpl;
 
 @SpringBootTest
 public class CalculateCreditUnderAgeTest {
@@ -23,7 +23,7 @@ public class CalculateCreditUnderAgeTest {
     private ScoringConfiguration scoringConfiguration;
 
     @Autowired
-    private ScoringService scoringService;
+    private ScoringServiceImpl scoringService;
 
     @Autowired
     ObjectMapper mapper;
@@ -33,7 +33,7 @@ public class CalculateCreditUnderAgeTest {
         ScoringDataDto scoringData = mapper.readValue(scoringDataInput, ScoringDataDto.class);
         scoringData.setBirthdate(LocalDate.now().minusYears(20).plusDays(1));
         CreditDeniedException resultException = assertThrows(CreditDeniedException.class, () -> scoringService.calculateCredit(scoringData));
-        assertEquals("bad age", resultException.getReason());
+        assertEquals(ErrorMessages.badAge, resultException.getReason());
     }
 
     private static final String scoringDataInput = """

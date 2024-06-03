@@ -13,6 +13,8 @@ import ru.neoflex.training.calculator.model.OfferSale;
 @ConfigurationProperties("scoring.offers")
 public class ScoringConfiguration {
 
+    private BigDecimal baseRate;
+
     private Map<String, OfferSale> sales = new HashMap<>();
 
     public void setSales(Map<String, Object> s) {
@@ -22,5 +24,9 @@ public class ScoringConfiguration {
                             new BigDecimal(((Number) ((Map<String, Object>) sale.getValue()).get("amount-multiply")).doubleValue()),
                             new BigDecimal(((Number) ((Map<String, Object>) sale.getValue()).get("temp-multiply")).doubleValue())));
         }
+    }
+
+    public void setBaseRate(BigDecimal baseRate) {
+        this.baseRate  = baseRate;
     }
 }

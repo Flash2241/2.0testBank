@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.neoflex.training.calculator.controller.CalculatorController;
 import ru.neoflex.training.calculator.model.dto.CreditDto;
 import ru.neoflex.training.calculator.model.dto.ScoringDataDto;
-import ru.neoflex.training.calculator.service.ScoringService;
+import ru.neoflex.training.calculator.service.implementation.ScoringServiceImpl;
 
 @WebMvcTest(CalculatorController.class)
 public class CalculateCreditSuccess {
@@ -28,7 +28,7 @@ public class CalculateCreditSuccess {
     ObjectMapper mapper;
 
     @MockBean
-    ScoringService scoringService;
+    ScoringServiceImpl scoringService;
 
     @Test
     public void testPrescoring() throws Exception {

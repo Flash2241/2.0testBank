@@ -1,5 +1,14 @@
 package ru.neoflex.training.calculator.openapi;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
+
+@OpenAPIDefinition(
+        info = @Info(
+                title = "Calculator API",
+                version = "1.0.0"
+        )
+)
 public class OpenApiDescriptions {
 
     public static final String BadRequestExample =

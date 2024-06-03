@@ -13,7 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.neoflex.training.calculator.configuration.ScoringConfiguration;
 import ru.neoflex.training.calculator.model.dto.CreditDto;
 import ru.neoflex.training.calculator.model.dto.ScoringDataDto;
-import ru.neoflex.training.calculator.service.ScoringService;
+import ru.neoflex.training.calculator.service.implementation.ScoringServiceImpl;
 
 @SpringBootTest
 public class CalculateCreditSuccessTest {
@@ -22,7 +22,7 @@ public class CalculateCreditSuccessTest {
     private ScoringConfiguration scoringConfiguration;
 
     @Autowired
-    private ScoringService scoringService;
+    private ScoringServiceImpl scoringService;
 
     @Autowired
     ObjectMapper mapper;
@@ -68,63 +68,63 @@ public class CalculateCreditSuccessTest {
 
     private static final String creditOutput = """
             {
-               "amount": "10000.00000",
-               "isInsuranceEnabled": false,
-               "isSalaryClient": false,
-               "monthlyPayment": "1715.61394",
-               "paymentSchedule": [
-                 {
-                   "date": "2024-07-01",
-                   "debtPayment": "1632.28061",
-                   "interestPayment": "83.33333",
-                   "number": 1,
-                   "remainingDebt": "8367.71939",
-                   "totalPayment": "1715.61394"
-                 },
-                 {
-                   "date": "2024-08-01",
-                   "debtPayment": "1645.88295",
-                   "interestPayment": "69.73099",
-                   "number": 2,
-                   "remainingDebt": "6721.83644",
-                   "totalPayment": "3431.22788"
-                 },
-                 {
-                   "date": "2024-09-01",
-                   "debtPayment": "1659.59864",
-                   "interestPayment": "56.01530",
-                   "number": 3,
-                   "remainingDebt": "5062.23781",
-                   "totalPayment": "5146.84183"
-                 },
-                 {
-                   "date": "2024-10-01",
-                   "debtPayment": "1673.42863",
-                   "interestPayment": "42.18532",
-                   "number": 4,
-                   "remainingDebt": "3388.80918",
-                   "totalPayment": "6862.45577"
-                 },
-                 {
-                   "date": "2024-11-01",
-                   "debtPayment": "1687.37387",
-                   "interestPayment": "28.24008",
-                   "number": 5,
-                   "remainingDebt": "1701.43531",
-                   "totalPayment": "8578.06971"
-                 },
-                 {
-                   "date": "2024-12-01",
-                   "debtPayment": "1701.43531",
-                   "interestPayment": "14.17863",
-                   "number": 6,
-                   "remainingDebt": "0.00000",
-                   "totalPayment": "10293.68365"
-                 }
-               ],
-               "psk": "10293.68365",
-               "rate": "10.00000",
-               "term": 6
-             }
+                "amount": "10000.00000",
+                "isInsuranceEnabled": false,
+                "isSalaryClient": false,
+                "monthlyPayment": "1715.61394",
+                "paymentSchedule": [
+                  {
+                    "date": "2024-07-03",
+                    "debtPayment": "1632.28061",
+                    "interestPayment": "83.33333",
+                    "number": 1,
+                    "remainingDebt": "8367.71939",
+                    "totalPayment": "1715.61394"
+                  },
+                  {
+                    "date": "2024-08-03",
+                    "debtPayment": "1645.88295",
+                    "interestPayment": "69.73099",
+                    "number": 2,
+                    "remainingDebt": "6721.83644",
+                    "totalPayment": "3431.22788"
+                  },
+                  {
+                    "date": "2024-09-03",
+                    "debtPayment": "1659.59864",
+                    "interestPayment": "56.01530",
+                    "number": 3,
+                    "remainingDebt": "5062.23781",
+                    "totalPayment": "5146.84183"
+                  },
+                  {
+                    "date": "2024-10-03",
+                    "debtPayment": "1673.42863",
+                    "interestPayment": "42.18532",
+                    "number": 4,
+                    "remainingDebt": "3388.80918",
+                    "totalPayment": "6862.45577"
+                  },
+                  {
+                    "date": "2024-11-03",
+                    "debtPayment": "1687.37387",
+                    "interestPayment": "28.24008",
+                    "number": 5,
+                    "remainingDebt": "1701.43531",
+                    "totalPayment": "8578.06971"
+                  },
+                  {
+                    "date": "2024-12-03",
+                    "debtPayment": "1701.43531",
+                    "interestPayment": "14.17863",
+                    "number": 6,
+                    "remainingDebt": "0.00000",
+                    "totalPayment": "10293.68365"
+                  }
+                ],
+                "psk": "10293.68365",
+                "rate": "10.00000",
+                "term": 6
+              }
             """;
 }
