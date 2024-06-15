@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,6 +38,7 @@ import ru.neoflex.training.calculator.service.algorithm.implementation.SalaryIns
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class ScoringServiceImpl implements ScoringService {
     //  точность расчетов
     private final MathContext mcCount = new MathContext(50);
@@ -49,27 +51,17 @@ public class ScoringServiceImpl implements ScoringService {
     @Value("${scoring.offers.insurance-price}")
     private BigDecimal insurancePrice;   // ежегодно нужно оплачивать
 
-    private Map<String, PrescoringAlgorithm> prescoringAlgorithms;
+    private final List<PrescoringAlgorithm> prescoringAlgorithms;
 
-    public ScoringServiceImpl(ScoringConfiguration scoringConfiguration) {
-        prescoringAlgorithms = new HashMap<>();
-        prescoringAlgorithms.put(InsuranceAlgorithm.getName(), new InsuranceAlgorithm(scoringConfiguration));
-        prescoringAlgorithms.put(NotSalaryNotInsuranceAlgorithm.getName(), new NotSalaryNotInsuranceAlgorithm(scoringConfiguration));
-        prescoringAlgorithms.put(SalaryAlgorithm.getName(), new SalaryAlgorithm(scoringConfiguration));
-        prescoringAlgorithms.put(SalaryInsuranceAlgorithm.getName(), new SalaryInsuranceAlgorithm(scoringConfiguration));
-    }
 
     public List<LoanOfferDto> calculatePrescoring(LoanStatementRequestDto request) {
         log.debug("Create offers input: data {}", request);
         validatePrescoring(request);
         log.info("Create offers to client {} {}", request.getFirstName(), request.getLastName());
         List<LoanOfferDto> result =
-                new ArrayList<>(
-                        prescoringAlgorithms.values()
-                                .stream()
-                                .map(a -> a.calculatePrescoring(request))
-                                .collect(Collectors.toList())
-                );
+                prescoringAlgorithms.stream()
+                        .map(a -> a.calculatePrescoring(request))
+                        .collect(Collectors.toList());
 
         log.info("Prescoring sorting result by rate descending");
         result.sort(Comparator.comparing(LoanOfferDto::getRate,
@@ -122,7 +114,7 @@ public class ScoringServiceImpl implements ScoringService {
             throw new CreditDeniedException(ErrorMessages.denied, ErrorMessages.unemployed);
         }
         if (!scoringData.getEmployment().getSalary().equals(BigDecimal.valueOf(0))
-            && scoringData.getAmount().divide(scoringData.getEmployment().getSalary(), mcCount).compareTo(BigDecimal.valueOf(25)) >= 0) {
+                && scoringData.getAmount().divide(scoringData.getEmployment().getSalary(), mcCount).compareTo(BigDecimal.valueOf(25)) >= 0) {
             throw new CreditDeniedException(ErrorMessages.denied, ErrorMessages.amountIsTooBig);
         }
         if (scoringData.getEmployment().getSalary().equals(BigDecimal.valueOf(0))) {
@@ -143,7 +135,7 @@ public class ScoringServiceImpl implements ScoringService {
     /**
      * Подсчет ставки кредита на информации о клиенте.
      *
-     * @param baseRate базовая ставка в процентах
+     * @param baseRate    базовая ставка в процентах
      * @param scoringData данные о клиенте
      * @return ставка в процентах (например, 15)
      */
@@ -186,8 +178,8 @@ public class ScoringServiceImpl implements ScoringService {
      * b - месячная процентная ставка (считается как годовая ставка / 12)
      * c - количество платежей.
      *
-     * @param amount сумма под кредит
-     * @param rate годовая ставка дробью (например, 0.12)
+     * @param amount         сумма под кредит
+     * @param rate           годовая ставка дробью (например, 0.12)
      * @param paymentsNumber количество выплат
      * @return ежемесячный платеж
      */
@@ -204,7 +196,7 @@ public class ScoringServiceImpl implements ScoringService {
      * PSK = monthlyPayment * term + insuranceAnnuallyPrice * (term / 12)
      *
      * @param monthlyPayment ежемесячная оплата кредита
-     * @param term количество месяцев
+     * @param term           количество месяцев
      * @return полная стоимость кредита
      */
     private BigDecimal calculatePsk(BigDecimal monthlyPayment, int term, boolean isInsuranceEnabled) {
@@ -220,9 +212,9 @@ public class ScoringServiceImpl implements ScoringService {
     /**
      * Расчет графика платежей.
      *
-     * @param amount сумма займа
-     * @param rate годовая ставка дробью (например, 0.12)
-     * @param term количество месяцев
+     * @param amount         сумма займа
+     * @param rate           годовая ставка дробью (например, 0.12)
+     * @param term           количество месяцев
      * @param monthlyPayment ежемесячная оплата
      * @return описание каждого необходимого платежа в {@link PaymentScheduleElementDto}
      */

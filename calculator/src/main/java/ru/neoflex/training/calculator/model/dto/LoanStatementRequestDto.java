@@ -52,7 +52,7 @@ public class LoanStatementRequestDto {
     @Pattern(regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$",
             message = "'email' must be valid email address")
     private String email;
-    @Schema(description = "дата рождения кредитора", example = "2000.01.01")
+    @Schema(description = "дата рождения кредитора", example = "2000-01-01")
     @NotNull(message = "'birthdate' field is required")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd")
     private LocalDate birthdate;

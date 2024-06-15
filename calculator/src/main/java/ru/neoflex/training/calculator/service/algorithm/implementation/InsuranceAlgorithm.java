@@ -1,10 +1,12 @@
 package ru.neoflex.training.calculator.service.algorithm.implementation;
 
+import org.springframework.stereotype.Service;
 import ru.neoflex.training.calculator.configuration.ScoringConfiguration;
 import ru.neoflex.training.calculator.model.dto.LoanOfferDto;
 import ru.neoflex.training.calculator.model.dto.LoanStatementRequestDto;
 import ru.neoflex.training.calculator.service.algorithm.PrescoringAlgorithm;
 
+@Service
 public class InsuranceAlgorithm extends PrescoringAlgorithm {
     protected static String AlgoName = "insurance";
 
