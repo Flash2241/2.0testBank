@@ -1,0 +1,27 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /calculator
+
+spring:
+  application:
+    name: Calculator
+
+scoring:
+  offers:
+    base-rate: 10
+    insurance-price: 150000   # ежегодно
+    sales:
+      insurance:
+        rate-decrease: 2
+        amount-multiply: 1.2
+        temp-multiply: 1.1
+      salary:
+        rate-decrease: 4
+        amount-multiply: 1.5
+        temp-multiply: 1.2
+      insurance-salary:
+        rate-decrease: 6
+        amount-multiply: 2
+        temp-multiply: 2
+
